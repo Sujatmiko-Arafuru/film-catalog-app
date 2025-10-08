@@ -1,0 +1,21 @@
+Nama: [Isi Nama]
+NIM: [Isi NIM]
+Kelas: [Isi Kelas]
+
+Auth/Token:
+- Login via halaman `#/login` (email & password akun Dicoding). Token akan disimpan di `localStorage` sebagai `auth-token`.
+- Jika tidak login, app fallback pakai `CONFIG.API_KEY` (atau endpoint guest) agar tetap bisa jalan.
+
+Konfigurasi API:
+- Base URL: https://story-api.dicoding.dev/v1
+- GET List (dengan lokasi): `/stories?location=1`
+- POST Tambah Story: `/stories` (butuh token) atau `/stories/guest`
+
+Deployment (GitHub Pages)
+- Jalankan: `npm install && npm run deploy`
+- URL: [isi setelah deploy] (contoh: https://<username>.github.io/film-catalog-app/)
+
+Catatan pemakaian:
+- Kalau tester ingin langsung uji POST dengan auth, silakan login dulu di `#/login`.
+- Token otomatis dipakai untuk request setelah login.
+
