@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/katalog-app-dicoding/favicon.png" />
+    <title>Katalog Film</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Debug script -->
+    <script src="/scripts/debug.js"></script>
+    
+    <link rel="manifest" href="/katalog-app-dicoding/assets/manifest-B516R36m.webmanifest" />
+    <meta name="theme-color" content="#667eea" />
+    <script type="module" crossorigin src="/katalog-app-dicoding/assets/index-CPSIZH3D.js"></script>
+    <link rel="stylesheet" crossorigin href="/katalog-app-dicoding/assets/index-C9PEaiZt.css">
+  </head>
+  <body>
+    
+    <header>
+      <div class="main-header container">
+            <a class="brand-name" href="#/">Katalog Film</a>
+
+        <nav id="navigation-drawer" class="navigation-drawer">
+            <ul id="nav-list" class="nav-list">
+              <li><a href="#/">Beranda <small>(Alt+1)</small></a></li>
+              <li><a href="#/map">Peta Film <small>(Alt+2)</small></a></li>
+              <li><a href="#/add">Tambah Film <small>(Alt+3)</small></a></li>
+              <li><a href="#/about">Tentang <small>(Alt+4)</small></a></li>
+              <li><a href="#/register">Daftar</a></li>
+              <li><a id="login-link" href="#/login">Login</a></li>
+            </ul>
+        </nav>
+
+        <button id="drawer-button" class="drawer-button" aria-label="Toggle navigation menu">☰</button>
+      </div>
+    </header>
+
+    <main id="main-content" class="main-content"></main>
+
+    <footer class="container" role="contentinfo">
+      <p style="color:#fff; opacity:.9">© 2025 Katalog Film</p>
+    </footer>
+  </body>
+</html>
