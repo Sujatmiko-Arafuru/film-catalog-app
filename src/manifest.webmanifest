@@ -1,20 +1,49 @@
 {
-  "name": "Katalog Film",
-  "short_name": "Film",
+  "name": "Katalog Story",
+  "short_name": "Story",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#667eea",
-  "description": "Katalog film dengan peta, favorit, push, dan offline.",
+  "description": "Katalog story dengan peta, favorit, push notification, dan mode offline.",
   "icons": [
-    { "src": "/favicon.png", "sizes": "64x64 128x128 256x256", "type": "image/png" }
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ],
   "screenshots": [
-    { "src": "/images/logo.png", "sizes": "512x256", "type": "image/png", "form_factor": "wide" }
+    { 
+      "src": "/images/logo.png", 
+      "sizes": "512x256", 
+      "type": "image/png", 
+      "form_factor": "wide" 
+    }
   ],
   "shortcuts": [
-    { "name": "Beranda", "url": "/#/", "icons": [{"src":"/favicon.png","sizes":"64x64","type":"image/png"}] },
-    { "name": "Peta", "url": "/#/map", "icons": [{"src":"/favicon.png","sizes":"64x64","type":"image/png"}] }
+    { 
+      "name": "Beranda", 
+      "url": "/#/", 
+      "icons": [{"src":"/favicon.png","sizes":"192x192","type":"image/png"}] 
+    },
+    { 
+      "name": "Peta", 
+      "url": "/#/map", 
+      "icons": [{"src":"/favicon.png","sizes":"192x192","type":"image/png"}] 
+    },
+    { 
+      "name": "Tambah Story", 
+      "url": "/#/add", 
+      "icons": [{"src":"/favicon.png","sizes":"192x192","type":"image/png"}] 
+    }
   ]
 }
 

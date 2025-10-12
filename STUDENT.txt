@@ -1,21 +1,46 @@
-Nama: [Isi Nama]
-NIM: [Isi NIM]
-Kelas: [Isi Kelas]
+Nama: [Angelio Asa Triatmaja]
+Kode Siswa: [f014d5y0229]
+
+URL Deployment: https://sujatmiko-arafuru.github.io/film-catalog-app/
+
+Fitur yang Diimplementasikan:
+1. PWA (Progressive Web App)
+   - Installable (Add to Homescreen dengan install prompt)
+   - Offline Mode (caching dengan Service Worker)
+   - App Shell caching untuk performa optimal
+   
+2. Push Notification
+   - Auto-subscribe ke push notification saat pertama kali membuka aplikasi
+   - Menggunakan VAPID public key sesuai Story API
+   - Notifikasi real-time dari server
+   
+3. IndexedDB
+   - Menyimpan data favorit story secara lokal
+   - Persistensi data offline
+   
+4. Geolocation & Maps
+   - Integrasi Leaflet untuk menampilkan lokasi story
+   - Add story dengan lokasi GPS
+   
+5. Authentication
+   - Login/Register dengan Dicoding account
+   - Guest mode untuk akses tanpa login
 
 Auth/Token:
-- Login via halaman `#/login` (email & password akun Dicoding). Token akan disimpan di `localStorage` sebagai `auth-token`.
-- Jika tidak login, app fallback pakai `CONFIG.API_KEY` (atau endpoint guest) agar tetap bisa jalan.
+- Login via halaman `#/login` (email & password akun Dicoding)
+- Token akan disimpan di `localStorage` sebagai `auth-token`
+- Jika tidak login, app fallback pakai guest endpoint
 
 Konfigurasi API:
 - Base URL: https://story-api.dicoding.dev/v1
-- GET List (dengan lokasi): `/stories?location=1`
-- POST Tambah Story: `/stories` (butuh token) atau `/stories/guest`
+- GET List: `/stories?location=1`
+- POST Story: `/stories` (dengan token) atau `/stories/guest`
+- Push Subscribe: `/notifications/subscribe`
+- VAPID Key: BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk
 
-Deployment (GitHub Pages)
-- Jalankan: `npm install && npm run deploy`
-- URL: [isi setelah deploy] (contoh: https://<username>.github.io/film-catalog-app/)
-
-Catatan pemakaian:
-- Kalau tester ingin langsung uji POST dengan auth, silakan login dulu di `#/login`.
-- Token otomatis dipakai untuk request setelah login.
+Cara Build & Deploy:
+1. Install dependencies: `npm install`
+2. Build production: `npm run build`
+3. Deploy ke GitHub Pages: `npm run deploy`
+4. URL akan tersedia di: https://sujatmiko-arafuru.github.io/film-catalog-app/
 

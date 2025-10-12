@@ -1,24 +1,24 @@
 import CONFIG from '../config';
 
-class FilmApi {
-  static async getFilms() {
-    // ambil langsung dari Story API, tanpa dummy/local fallback
+class StoryApi {
+  static async getStories() {
+    // ambil data stories dari api
     const token = localStorage.getItem('auth-token') || CONFIG.API_KEY;
     const res = await fetch(`${CONFIG.BASE_URL}/stories?location=1`, {
       headers: { 'Authorization': `Bearer ${token}` },
     });
     const json = await res.json();
-    if (!res.ok || json.error) throw new Error(json.message || 'Gagal ambil data');
+    if (!res.ok || json.error) throw new Error(json.message || 'gagal ambil data');
     return json.listStory || [];
   }
 
-  static async addFilm(formData) {
-    // kirim ke API dengan field yang valid saja
+  static async addStory(formData) {
+    // tambah story baru
     const token = localStorage.getItem('auth-token');
     const endpoint = token ? `${CONFIG.BASE_URL}/stories` : `${CONFIG.BASE_URL}/stories/guest`;
     const headers = token ? { 'Authorization': `Bearer ${token}` } : undefined;
 
-    // bangun form khusus untuk API (tanpa 'name')
+    // prepare form data
     const apiForm = new FormData();
     const desc = formData.get('description');
     const photo = formData.get('photo');
@@ -31,27 +31,27 @@ class FilmApi {
 
     const res = await fetch(endpoint, { method: 'POST', headers, body: apiForm });
     const json = await res.json();
-    if (json.error) throw new Error(json.message || 'Gagal tambah data');
+    if (json.error) throw new Error(json.message || 'gagal tambah story');
     this.notifyDataChange();
-    return { error: false, message: 'Film berhasil ditambahkan!' };
+    return { error: false, message: 'Story berhasil ditambahkan!' };
   }
 
-  static createFilmFromFormData(formData) {
-    const name = formData.get('name') || 'Film Baru';
-    const description = formData.get('description') || 'Deskripsi film';
+  static createStoryFromFormData(formData) {
+    const name = formData.get('name') || 'Story Baru';
+    const description = formData.get('description') || 'Deskripsi story';
     const lat = parseFloat(formData.get('lat')) || -6.200000;
     const lon = parseFloat(formData.get('lon')) || 106.816666;
     
-    // bikin URL buat file yang diupload
+    // buat url preview foto
     const photoFile = formData.get('photo');
-    let photoUrl = 'https://via.placeholder.com/300x200/667eea/ffffff?text=Film+Baru';
+    let photoUrl = 'https://via.placeholder.com/300x200/667eea/ffffff?text=Story+Baru';
     
     if (photoFile) {
       photoUrl = URL.createObjectURL(photoFile);
     }
     
     return {
-      id: 'film-' + Date.now(),
+      id: 'story-' + Date.now(),
       name: name,
       description: description,
       photoUrl: photoUrl,
@@ -61,19 +61,32 @@ class FilmApi {
     };
   }
 
-  static async getFilmDetail(id) {
-    // ambil semua dari API lalu cari id yang dimaksud
-    const films = await this.getFilms();
-    const film = films.find(f => f.id === id);
-    if (!film) throw new Error('Film tidak ditemukan');
-    return film;
+  static async getStoryDetail(id) {
+    // cari story by id
+    const stories = await this.getStories();
+    const story = stories.find(f => f.id === id);
+    if (!story) throw new Error('story tidak ditemukan');
+    return story;
   }
 
-  // method buat kasih tau semua halaman kalo ada perubahan data
+  // notify data change
   static notifyDataChange() {
-    // kirim custom event ke semua halaman
-    window.dispatchEvent(new CustomEvent('filmsUpdated'));
+    window.dispatchEvent(new CustomEvent('storiesUpdated'));
+  }
+  
+  // backward compatibility
+  static async getFilms() {
+    return this.getStories();
+  }
+  
+  static async addFilm(formData) {
+    return this.addStory(formData);
+  }
+  
+  static async getFilmDetail(id) {
+    return this.getStoryDetail(id);
   }
 }
 
-export default FilmApi;
+export default StoryApi;
+export { StoryApi as FilmApi };

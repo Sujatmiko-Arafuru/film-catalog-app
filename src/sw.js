@@ -1,4 +1,4 @@
-const CACHE_NAME = 'film-app-v1';
+const CACHE_NAME = 'story-app-v1';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -8,39 +8,73 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
+  // cache app shell
   event.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(APP_SHELL)));
 });
 
 self.addEventListener('activate', (event) => {
+  // hapus cache lama
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
   );
 });
 
-// network-first untuk data API, cache-first untuk shell
+// handle fetch request
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  if (url.pathname.startsWith('/v1/stories')) {
+  
+  // network-first buat api stories
+  if (url.origin === 'https://story-api.dicoding.dev' && url.pathname.includes('/stories')) {
     event.respondWith(
-      fetch(event.request).then((r) => {
-        const clone = r.clone();
-        caches.open(CACHE_NAME).then((c) => c.put(event.request, clone));
-        return r;
-      }).catch(() => caches.match(event.request))
+      fetch(event.request)
+        .then((response) => {
+          // simpan ke cache
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+          return response;
+        })
+        .catch(() => {
+          // fallback ke cache
+          return caches.match(event.request);
+        })
     );
     return;
   }
-  event.respondWith(caches.match(event.request).then((resp) => resp || fetch(event.request)));
+  
+  // cache-first buat app shell
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request).then((fetchResponse) => {
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, fetchResponse.clone());
+          return fetchResponse;
+        });
+      });
+    })
+  );
 });
 
 self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : { title: 'Story baru', options: { body: 'Cek cerita terbaru!' } };
-  event.waitUntil(self.registration.showNotification(data.title || 'Katalog Film', data.options || { body: 'Update terbaru' }));
+  console.log('push notification masuk');
+  
+  async function chainPromise() {
+    const data = await event.data.json();
+    await self.registration.showNotification(data.title, {
+      body: data.options.body,
+      icon: '/favicon.png',
+      badge: '/favicon.png'
+    });
+  }
+  
+  event.waitUntil(chainPromise());
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = '/#/';
+  // buka app
   event.waitUntil(clients.matchAll({ type: 'window' }).then((clis) => {
     for (const c of clis) {
       if ('focus' in c) return c.focus();
