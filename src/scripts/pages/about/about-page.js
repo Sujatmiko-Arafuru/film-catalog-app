@@ -26,6 +26,9 @@ export default class AboutPage {
               <li><strong>Multiple Layer:</strong> Pilih antara layer OpenStreetMap, Satelit, atau Terrain</li>
               <li><strong>Tambah Film:</strong> Upload foto dan pilih lokasi untuk menambah film baru</li>
               <li><strong>Kamera Langsung:</strong> Ambil foto langsung dari kamera perangkat</li>
+              <li><strong>Mode Offline:</strong> Akses konten yang sudah dibuka meskipun tidak ada internet</li>
+              <li><strong>Installable PWA:</strong> Install aplikasi ke perangkat seperti aplikasi native</li>
+              <li><strong>Push Notification:</strong> Dapatkan notifikasi untuk update terbaru</li>
               <li><strong>Aksesibilitas:</strong> Dukungan keyboard navigation dan screen reader</li>
             </ul>
           </div>
@@ -35,10 +38,33 @@ export default class AboutPage {
             <ul class="tech-list">
               <li><strong>Frontend:</strong> Vanilla JavaScript dengan ES6+ modules</li>
               <li><strong>Build Tool:</strong> Vite untuk development dan build</li>
+              <li><strong>PWA:</strong> Vite Plugin PWA dengan Workbox untuk caching strategy</li>
               <li><strong>Maps:</strong> Leaflet.js untuk peta interaktif</li>
               <li><strong>API:</strong> Dicoding Story API untuk data film</li>
               <li><strong>Styling:</strong> CSS3 dengan responsive design</li>
             </ul>
+          </div>
+
+          <div class="about-section">
+            <h2>Progressive Web App (PWA)</h2>
+            <p>
+              Aplikasi ini adalah Progressive Web App yang dapat di-install ke perangkat Anda:
+            </p>
+            <ul>
+              <li><strong>Installable:</strong> Install aplikasi dari browser untuk akses cepat</li>
+              <li><strong>Offline First:</strong> Konten yang sudah dibuka dapat diakses tanpa internet</li>
+              <li><strong>Auto Update:</strong> Aplikasi akan otomatis update ke versi terbaru</li>
+              <li><strong>Fast Loading:</strong> Menggunakan cache untuk loading yang lebih cepat</li>
+              <li><strong>App-like:</strong> Pengalaman seperti aplikasi native dengan standalone mode</li>
+            </ul>
+            <p>
+              Untuk menginstall aplikasi:
+            </p>
+            <ol>
+              <li>Klik ikon install yang muncul di browser atau address bar</li>
+              <li>Atau buka menu browser dan pilih "Install Katalog Story"</li>
+              <li>Aplikasi akan muncul di home screen perangkat Anda</li>
+            </ol>
           </div>
 
           <div class="about-section">

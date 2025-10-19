@@ -15,8 +15,15 @@
     <!-- Debug script -->
     <script src="./scripts/debug.js"></script>
     
-    <link rel="manifest" href="./manifest.webmanifest" />
+    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#667eea" />
+    <meta name="description" content="Katalog story dengan peta, favorit, push notification, dan mode offline." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Katalog Story" />
+    <link rel="apple-touch-icon" href="./favicon.png" />
+    
+    <!-- Manifest akan di-inject otomatis oleh vite-plugin-pwa -->
     <script type="module" src="./scripts/index.js"></script>
   </head>
   <body>

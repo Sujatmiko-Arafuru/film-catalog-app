@@ -3,6 +3,8 @@ import '../styles/styles.css';
 import App from './pages/app';
 import PushNotification from './utils/push-notification';
 import InstallPrompt from './utils/install-prompt';
+import OfflineIndicator from './utils/offline-indicator';
+import ServiceWorkerUpdatePrompt from './utils/sw-update-prompt';
 
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('app starting...');
@@ -10,6 +12,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     // init install prompt
     new InstallPrompt();
+    
+    // init offline indicator
+    new OfflineIndicator();
+    
+    // init service worker update prompt
+    new ServiceWorkerUpdatePrompt();
     
     const app = new App({
       content: document.querySelector('#main-content'),
@@ -51,13 +59,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     console.log('app ready');
 
-    // register service worker
+    // Service worker akan otomatis di-register oleh vite-plugin-pwa
+    // Tunggu sampai service worker ready
     if ('serviceWorker' in navigator) {
       try {
-        const reg = await navigator.serviceWorker.register('/film-catalog-app/sw.js');
-        console.log('sw registered:', reg.scope);
+        // Tunggu service worker ready
+        const reg = await navigator.serviceWorker.ready;
+        console.log('sw ready:', reg.scope);
         
-        // subscribe push notification
+        // subscribe push notification setelah service worker ready
         const alreadySubscribed = localStorage.getItem('push-subscribed');
         if (!alreadySubscribed) {
           setTimeout(async () => {
@@ -68,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           }, 2000);
         }
       } catch (e) {
-        console.warn('sw register failed', e);
+        console.warn('sw error:', e);
       }
     }
   } catch (error) {

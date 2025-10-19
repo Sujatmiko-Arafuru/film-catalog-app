@@ -1,64 +1,73 @@
-const CACHE_NAME = 'story-app-v1';
+import { precacheAndRoute } from 'workbox-precaching';
+import { registerRoute } from 'workbox-routing';
+import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { ExpirationPlugin } from 'workbox-expiration';
+import { CacheableResponsePlugin } from 'workbox-cacheable-response';
+
 const BASE_PATH = '/film-catalog-app';
-const APP_SHELL = [
-  `${BASE_PATH}/`,
-  `${BASE_PATH}/index.html`,
-  `${BASE_PATH}/favicon.png`
-];
 
-self.addEventListener('install', (event) => {
-  // cache app shell
-  event.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(APP_SHELL)));
-});
+// Precache semua asset yang di-generate oleh build
+precacheAndRoute(self.__WB_MANIFEST);
 
-self.addEventListener('activate', (event) => {
-  // hapus cache lama
-  event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
-  );
-});
+// Network-first strategy untuk API stories
+registerRoute(
+  ({ url }) => url.origin === 'https://story-api.dicoding.dev' && url.pathname.includes('/stories'),
+  new NetworkFirst({
+    cacheName: 'api-stories',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 5 * 60, // 5 minutes
+      }),
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+    ],
+    networkTimeoutSeconds: 10,
+  })
+);
 
-// handle fetch request
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-  
-  // network-first buat api stories
-  if (url.origin === 'https://story-api.dicoding.dev' && url.pathname.includes('/stories')) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // simpan ke cache hanya untuk GET request
-          if (event.request.method === 'GET') {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // fallback ke cache
-          return caches.match(event.request);
-        })
-    );
-    return;
-  }
-  
-  // cache-first buat app shell
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((fetchResponse) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          // hanya cache request GET
-          if (event.request.method === 'GET') {
-            cache.put(event.request, fetchResponse.clone());
-          }
-          return fetchResponse;
-        });
-      });
-    })
-  );
-});
+// Cache-first untuk CDN (Leaflet, unpkg)
+registerRoute(
+  ({ url }) => url.origin === 'https://unpkg.com',
+  new CacheFirst({
+    cacheName: 'cdn-cache',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+      }),
+    ],
+  })
+);
+
+// Cache-first untuk map tiles
+registerRoute(
+  ({ url }) => url.hostname.includes('tile.openstreetmap.org'),
+  new CacheFirst({
+    cacheName: 'map-tiles',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 200,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+      }),
+    ],
+  })
+);
+
+// Stale-while-revalidate untuk images
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new StaleWhileRevalidate({
+    cacheName: 'images',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 100,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+      }),
+    ],
+  })
+);
 
 self.addEventListener('push', (event) => {
   console.log('push notification masuk');
