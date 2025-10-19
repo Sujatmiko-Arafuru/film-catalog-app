@@ -1,0 +1,20 @@
+<svg width="192" height="192" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="192" height="192" fill="url(#grad192)" rx="38"/>
+  
+  <!-- Grid pattern (4 squares) -->
+  <g fill="white">
+    <rect x="28" y="28" width="64" height="64" rx="10"/>
+    <rect x="100" y="28" width="64" height="64" rx="10"/>
+    <rect x="28" y="100" width="64" height="64" rx="10"/>
+    <rect x="100" y="100" width="64" height="64" rx="10"/>
+  </g>
+</svg>
+

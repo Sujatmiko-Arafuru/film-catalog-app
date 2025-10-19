@@ -22,7 +22,7 @@ export default defineConfig({
       srcDir: 'public',
       filename: 'sw.js',
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'images/logo.png'],
+      includeAssets: ['favicon.png', 'images/logo.png', 'images/icon-192.svg', 'images/icon-512.svg'],
       manifest: {
         name: 'Katalog Story',
         short_name: 'Story',
@@ -34,22 +34,16 @@ export default defineConfig({
         scope: '/film-catalog-app/',
         icons: [
           {
-            src: '/film-catalog-app/images/logo.png',
+            src: '/film-catalog-app/images/icon-192.svg',
             sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any'
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
           },
           {
-            src: '/film-catalog-app/images/logo.png',
+            src: '/film-catalog-app/images/icon-512.svg',
             sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: '/film-catalog-app/favicon.png',
-            sizes: '64x64',
-            type: 'image/png',
-            purpose: 'any'
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
           }
         ],
         shortcuts: [
