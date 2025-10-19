@@ -34,16 +34,22 @@ export default defineConfig({
         scope: '/film-catalog-app/',
         icons: [
           {
-            src: '/film-catalog-app/favicon.png',
+            src: '/film-catalog-app/images/logo.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: '/film-catalog-app/images/logo.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
           },
           {
             src: '/film-catalog-app/favicon.png',
-            sizes: '512x512',
+            sizes: '64x64',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           }
         ],
         shortcuts: [

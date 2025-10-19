@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/film-catalog-app/dev-sw.js?dev-sw', { scope: '/film-catalog-app/', type: 'module' })
