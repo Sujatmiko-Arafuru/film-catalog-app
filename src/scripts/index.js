@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // register service worker
     if ('serviceWorker' in navigator) {
       try {
-        const reg = await navigator.serviceWorker.register('/sw.js');
+        const reg = await navigator.serviceWorker.register('/film-catalog-app/sw.js');
         console.log('sw registered:', reg.scope);
         
         // subscribe push notification

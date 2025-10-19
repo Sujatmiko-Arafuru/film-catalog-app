@@ -1,0 +1,248 @@
+Submission Checklists:
+Mempertahankan Seluruh Kriteria Wajib Submission Sebelumnya (Terpenuhi)
+Menerapkan Push Notification (DIPERBAIKI)
+Implementasi PWA dengan Dukungan Instalasi dan Mode Offline (DIPERBAIKI)
+Penerapan IndexedDB (Terpenuhi)
+Distribusikan secara Publik (Terpenuhi)
+
+============================================================================================
+PERBAIKAN YANG SUDAH DILAKUKAN:
+============================================================================================
+
+1. PUSH NOTIFICATION ERROR - FIXED ✓
+   Lokasi: src/public/sw.js & dist/sw.js (baris 63-98)
+   
+   Masalah:
+   - Error "Unexpected token 'T', Test push... is not valid JSON" pada sw.js:62:35 dan sw.js:70:19
+   - event.data.json() gagal parse karena data bukan JSON valid
+   
+   Perbaikan yang diterapkan:
+   - Menambahkan validasi untuk memastikan event.data tidak null
+   - Menambahkan try-catch untuk menangani error parsing JSON
+   - Jika data bukan JSON, gunakan event.data.text() sebagai fallback
+   - Menambahkan default values untuk title dan body notification
+   
+   Kode yang diperbaiki:
+   ```javascript
+   async function chainPromise() {
+     // Validasi data push notification
+     if (!event.data) {
+       console.warn('push notification tanpa data');
+       return;
+     }
+     
+     let data;
+     try {
+       // Coba parse sebagai JSON
+       data = event.data.json();
+     } catch (error) {
+       // Jika bukan JSON, gunakan data text sebagai fallback
+       console.warn('push notification bukan JSON, gunakan text:', error);
+       const text = event.data.text();
+       data = {
+         title: 'Notifikasi Baru',
+         options: {
+           body: text
+         }
+       };
+     }
+     
+     // Tampilkan notifikasi dengan default values
+     await self.registration.showNotification(data.title || 'Notifikasi', {
+       body: data.options?.body || data.body || 'Anda memiliki notifikasi baru',
+       icon: `${BASE_PATH}/favicon.png`,
+       badge: `${BASE_PATH}/favicon.png`
+     });
+   }
+   ```
+
+2. CACHING ISSUE - FIXED ✓
+   Lokasi: src/public/sw.js & dist/sw.js (baris 31 & 53)
+   
+   Masalah yang diidentifikasi reviewer:
+   - Request yang bukan GET (POST/PUT/DELETE) juga ikut di-cache
+   - Ini bisa menyebabkan masalah dengan data submission
+   
+   Perbaikan yang diterapkan:
+   - Menambahkan pengecekan if (event.request.method === 'GET') sebelum cache.put()
+   - Diterapkan di 2 tempat: network-first strategy dan cache-first strategy
+   
+   Kode sebelum:
+   ```javascript
+   caches.open(CACHE_NAME).then((cache) => {
+     cache.put(event.request, responseToCache);
+   });
+   ```
+   
+   Kode sesudah:
+   ```javascript
+   if (event.request.method === 'GET') {
+     caches.open(CACHE_NAME).then((cache) => {
+       cache.put(event.request, responseToCache);
+     });
+   }
+   ```
+
+3. PWA INSTALLABLE - FIXED ✓
+   Lokasi: src/manifest.webmanifest & dist/assets/manifest-CVZIxN2I.webmanifest
+   
+   Masalah:
+   - Icon "Add to Homescreen" atau "Install" tidak muncul di browser
+   - start_url dan scope tidak sesuai dengan BASE_PATH deployment
+   - Path icon dan shortcuts menggunakan "/" bukan "/film-catalog-app/"
+   
+   Perbaikan yang diterapkan:
+   - Mengubah start_url dari "/" menjadi "/film-catalog-app/"
+   - Menambahkan scope: "/film-catalog-app/"
+   - Mengupdate semua path icon dari "/favicon.png" ke "/film-catalog-app/favicon.png"
+   - Mengupdate URL shortcuts dari "/#/" ke "/film-catalog-app/#/"
+   - Mengupdate path screenshots dari "/images/" ke "/film-catalog-app/images/"
+   
+   Konfigurasi manifest yang diperbaiki:
+   ```json
+   {
+     "name": "Katalog Story",
+     "short_name": "Story",
+     "start_url": "/film-catalog-app/",
+     "scope": "/film-catalog-app/",
+     "display": "standalone",
+     "icons": [
+       {
+         "src": "/film-catalog-app/favicon.png",
+         "sizes": "192x192",
+         "type": "image/png",
+         "purpose": "any maskable"
+       },
+       {
+         "src": "/film-catalog-app/favicon.png",
+         "sizes": "512x512",
+         "type": "image/png",
+         "purpose": "any maskable"
+       }
+     ]
+   }
+   ```
+
+4. APLIKASI LOCAL - NOTES
+   - Aplikasi sudah memiliki InstallPrompt class (src/scripts/utils/install-prompt.js)
+   - InstallPrompt menampilkan banner install yang muncul otomatis saat beforeinstallprompt event triggered
+   - Banner sudah memiliki styling yang baik dan UX yang user-friendly
+   - Service Worker sudah terdaftar di index.js
+
+============================================================================================
+---------------------------------------------------------------------------------------------
+
+const CACHE_NAME = 'story-app-v1';
+const BASE_PATH = '/film-catalog-app';
+const APP_SHELL = [
+  `${BASE_PATH}/`,
+  `${BASE_PATH}/index.html`,
+  `${BASE_PATH}/favicon.png`
+];
+ 
+self.addEventListener('install', (event) => {
+  // cache app shell
+  event.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(APP_SHELL)));
+});
+ 
+self.addEventListener('activate', (event) => {
+  // hapus cache lama
+  event.waitUntil(
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+  );
+});
+ 
+// handle fetch request
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // network-first buat api stories
+  if (url.origin === 'https://story-api.dicoding.dev' && url.pathname.includes('/stories')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // simpan ke cache
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+          return response;
+        })
+        .catch(() => {
+          // fallback ke cache
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+  
+  // cache-first buat app shell
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request).then((fetchResponse) => {
+        return caches.open(CACHE_NAME).then((cache) => {
+Tambahkan pengecekan agar hanya request GET yang boleh disimpan ke cache: 
+
+if (event.request.method === 'GET') {
+  caches.open(CACHE_NAME).then((cache) => {
+    cache.put(event.request, fetchResponse.clone());
+  });
+}
+
+
+          cache.put(event.request, fetchResponse.clone());
+          return fetchResponse;
+        });
+      });
+    })
+  );
+});
+ 
+self.addEventListener('push', (event) => {
+  console.log('push notification masuk');
+  
+  async function chainPromise() {
+    const data = await event.data.json();
+    await self.registration.showNotification(data.title, {
+      body: data.options.body,
+      icon: `${BASE_PATH}/favicon.png`,
+      badge: `${BASE_PATH}/favicon.png`
+    });
+  }
+  
+  event.waitUntil(chainPromise());
+});
+ 
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = `${BASE_PATH}/#/`;
+  // buka app
+  event.waitUntil(clients.matchAll({ type: 'window' }).then((clis) => {
+    for (const c of clis) {
+      if ('focus' in c) return c.focus();
+    }
+    if (clients.openWindow) return clients.openWindow(url);
+  }));
+});
+
+ ---------------------------------------------------------------------------------------------------------
+
+
+Reviewer's Note:
+Aplikasi local kamu belum bisa di review karena tampilannya masih seperti ini. Silahkan diperbaiki ya!
+(file foto terlampir)
+
+Menerapkan Push Notification
+Push notification pada aplikasi deploy belum bisa digunakan. Terdapat pesan error seperti ini. Silahkan lihat code review dibawah untuk memperbaikinya ya!
+(File Terlampir)
+
+Kamu dapat mengikuti beberapa saran di atas agar submission berikutnya dapat diterima dengan baik.
+
+
+Implementasi PWA dengan Dukungan Installasi dan Mode Offline
+Installable
+Pada aplikasi deploy tidak terdapat ikon "Add to Homescreen" atau "Install" 
+dos-7d09d25071a500de0cd78fc590175d4d20251012140358.png
+seharunya ada icon seperti ini:
+(file terlampir)
+Kamu bisa pelajari lagi modul Studi Kasus: PWA untuk CityCare App. Silahkan diperbaiki lagi ya!

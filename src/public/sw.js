@@ -1,10 +1,9 @@
 const CACHE_NAME = 'story-app-v1';
+const BASE_PATH = '/film-catalog-app';
 const APP_SHELL = [
-  '/',
-  '/index.html',
-  '/scripts/index.js',
-  '/styles/styles.css',
-  '/favicon.png'
+  `${BASE_PATH}/`,
+  `${BASE_PATH}/index.html`,
+  `${BASE_PATH}/favicon.png`
 ];
 
 self.addEventListener('install', (event) => {
@@ -28,11 +27,13 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          // simpan ke cache
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+          // simpan ke cache hanya untuk GET request
+          if (event.request.method === 'GET') {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
           return response;
         })
         .catch(() => {
@@ -48,7 +49,10 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((response) => {
       return response || fetch(event.request).then((fetchResponse) => {
         return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, fetchResponse.clone());
+          // hanya cache request GET
+          if (event.request.method === 'GET') {
+            cache.put(event.request, fetchResponse.clone());
+          }
           return fetchResponse;
         });
       });
@@ -60,11 +64,33 @@ self.addEventListener('push', (event) => {
   console.log('push notification masuk');
   
   async function chainPromise() {
-    const data = await event.data.json();
-    await self.registration.showNotification(data.title, {
-      body: data.options.body,
-      icon: '/favicon.png',
-      badge: '/favicon.png'
+    // Validasi data push notification
+    if (!event.data) {
+      console.warn('push notification tanpa data');
+      return;
+    }
+    
+    let data;
+    try {
+      // Coba parse sebagai JSON
+      data = event.data.json();
+    } catch (error) {
+      // Jika bukan JSON, gunakan data text sebagai fallback
+      console.warn('push notification bukan JSON, gunakan text:', error);
+      const text = event.data.text();
+      data = {
+        title: 'Notifikasi Baru',
+        options: {
+          body: text
+        }
+      };
+    }
+    
+    // Tampilkan notifikasi
+    await self.registration.showNotification(data.title || 'Notifikasi', {
+      body: data.options?.body || data.body || 'Anda memiliki notifikasi baru',
+      icon: `${BASE_PATH}/favicon.png`,
+      badge: `${BASE_PATH}/favicon.png`
     });
   }
   
@@ -73,7 +99,7 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = '/#/';
+  const url = `${BASE_PATH}/#/`;
   // buka app
   event.waitUntil(clients.matchAll({ type: 'window' }).then((clis) => {
     for (const c of clis) {
@@ -82,5 +108,4 @@ self.addEventListener('notificationclick', (event) => {
     if (clients.openWindow) return clients.openWindow(url);
   }));
 });
-
 
