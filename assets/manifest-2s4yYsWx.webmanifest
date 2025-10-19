@@ -1,20 +1,21 @@
 {
   "name": "Katalog Story",
   "short_name": "Story",
-  "start_url": "/",
+  "start_url": "/film-catalog-app/",
+  "scope": "/film-catalog-app/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#667eea",
   "description": "Katalog story dengan peta, favorit, push notification, dan mode offline.",
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "/film-catalog-app/favicon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/favicon.png",
+      "src": "/film-catalog-app/favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -22,7 +23,7 @@
   ],
   "screenshots": [
     { 
-      "src": "/images/logo.png", 
+      "src": "/film-catalog-app/images/logo.png", 
       "sizes": "512x256", 
       "type": "image/png", 
       "form_factor": "wide" 
@@ -31,18 +32,18 @@
   "shortcuts": [
     { 
       "name": "Beranda", 
-      "url": "/#/", 
-      "icons": [{"src":"/favicon.png","sizes":"192x192","type":"image/png"}] 
+      "url": "/film-catalog-app/#/", 
+      "icons": [{"src":"/film-catalog-app/favicon.png","sizes":"192x192","type":"image/png"}] 
     },
     { 
       "name": "Peta", 
-      "url": "/#/map", 
-      "icons": [{"src":"/favicon.png","sizes":"192x192","type":"image/png"}] 
+      "url": "/film-catalog-app/#/map", 
+      "icons": [{"src":"/film-catalog-app/favicon.png","sizes":"192x192","type":"image/png"}] 
     },
     { 
       "name": "Tambah Story", 
-      "url": "/#/add", 
-      "icons": [{"src":"/favicon.png","sizes":"192x192","type":"image/png"}] 
+      "url": "/film-catalog-app/#/add", 
+      "icons": [{"src":"/film-catalog-app/favicon.png","sizes":"192x192","type":"image/png"}] 
     }
   ]
 }
