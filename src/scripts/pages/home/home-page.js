@@ -1,6 +1,5 @@
 import FilmApi from '../../data/api';
 import { addFavorite, getFavorites, deleteFavorite } from '../../utils/index';
-import { urlBase64ToUint8Array } from './base64-helpers';
 
 export default class HomePage {
   constructor() {
@@ -22,10 +21,6 @@ export default class HomePage {
         
         <div class="films-section">
           <h2>Film Terbaru</h2>
-          <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
-            <button id="toggle-push" class="btn btn-secondary">Toggle Push</button>
-            <a href="#/favorites" class="btn btn-primary">Favorit</a>
-          </div>
           <div id="films-container" class="films-grid">
             <div class="loading">Memuat film...</div>
           </div>
@@ -38,7 +33,6 @@ export default class HomePage {
     console.log('Home page afterRender called');
     try {
       await this.loadFilms();
-      this.initPushToggle();
       this.setupDataListener();
     } catch (error) {
       console.error('Error in home page afterRender:', error);
@@ -54,32 +48,6 @@ export default class HomePage {
     });
   }
 
-  initPushToggle() {
-    const btn = document.getElementById('toggle-push');
-    if (!btn || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
-    const updateLabel = async () => {
-      const reg = await navigator.serviceWorker.getRegistration();
-      const sub = await reg?.pushManager.getSubscription();
-      btn.textContent = sub ? 'Disable Push' : 'Enable Push';
-    };
-    btn.addEventListener('click', async () => {
-      const reg = await navigator.serviceWorker.getRegistration();
-      if (!reg) return;
-      const sub = await reg.pushManager.getSubscription();
-      if (sub) {
-        await sub.unsubscribe();
-        updateLabel();
-        return;
-      }
-      const cfg = (await import('../../config')).default;
-      const vapid = cfg.VAPID_PUBLIC_KEY;
-      const converted = urlBase64ToUint8Array(vapid);
-      await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: converted });
-      updateLabel();
-    });
-    updateLabel();
-  }
-
   async loadFilms() {
     console.log('Loading films...');
     try {
@@ -88,7 +56,19 @@ export default class HomePage {
       await this.renderFilms();
     } catch (error) {
       console.error('Error loading films:', error);
-      this.showError('Gagal memuat data film');
+      
+      // Jika offline, coba tampilkan data dari favorites (IndexedDB)
+      if (!navigator.onLine) {
+        const favorites = await getFavorites();
+        if (favorites.length > 0) {
+          this.films = favorites;
+          await this.renderFilms();
+          this.showOfflineNotice();
+          return;
+        }
+      }
+      
+      this.showError('Gagal memuat data film. Periksa koneksi internet Anda.');
     }
   }
 
@@ -159,6 +139,26 @@ export default class HomePage {
     const container = document.getElementById('films-container');
     if (container) {
       container.innerHTML = `<div class="error-message">${message}</div>`;
+    }
+  }
+
+  showOfflineNotice() {
+    const container = document.getElementById('films-container');
+    if (container) {
+      const notice = document.createElement('div');
+      notice.style.cssText = `
+        background: #fff3cd;
+        color: #856404;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #ffc107;
+      `;
+      notice.innerHTML = `
+        <strong>Mode Offline</strong>
+        <p style="margin: 5px 0 0 0; font-size: 14px;">Menampilkan data dari favorit yang tersimpan.</p>
+      `;
+      container.insertBefore(notice, container.firstChild);
     }
   }
 }

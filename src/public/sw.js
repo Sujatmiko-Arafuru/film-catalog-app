@@ -1,5 +1,5 @@
 import { precacheAndRoute } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
+import { registerRoute, setCatchHandler } from 'workbox-routing';
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
@@ -8,6 +8,8 @@ const BASE_PATH = '/film-catalog-app';
 
 // Precache semua asset yang di-generate oleh build
 precacheAndRoute(self.__WB_MANIFEST);
+
+console.log('[SW] Service Worker initialized');
 
 // Network-first strategy untuk API stories
 registerRoute(
@@ -68,6 +70,66 @@ registerRoute(
     ],
   })
 );
+
+// Cache-first untuk CSS dan JS
+registerRoute(
+  ({ request }) => request.destination === 'style' || request.destination === 'script',
+  new CacheFirst({
+    cacheName: 'static-resources',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+      }),
+    ],
+  })
+);
+
+// Network-first untuk dokumen HTML dengan fallback
+registerRoute(
+  ({ request }) => request.destination === 'document',
+  new NetworkFirst({
+    cacheName: 'documents',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 10,
+        maxAgeSeconds: 24 * 60 * 60, // 1 day
+      }),
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+    ],
+    networkTimeoutSeconds: 5,
+  })
+);
+
+// Fallback handler untuk offline
+setCatchHandler(async ({ event }) => {
+  // Untuk navigation requests, return cached index.html
+  if (event.request.destination === 'document') {
+    const cache = await caches.open('documents');
+    const cachedResponse = await cache.match(`${BASE_PATH}/index.html`);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+  }
+  
+  // Untuk API requests, return error response
+  if (event.request.url.includes('/stories')) {
+    return new Response(
+      JSON.stringify({ 
+        error: true, 
+        message: 'Offline - menggunakan data cache' 
+      }),
+      { 
+        headers: { 'Content-Type': 'application/json' },
+        status: 503
+      }
+    );
+  }
+  
+  return Response.error();
+});
 
 self.addEventListener('push', (event) => {
   console.log('push notification masuk');

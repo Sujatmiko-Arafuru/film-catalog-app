@@ -69,6 +69,10 @@ class App {
             e.preventDefault();
             window.location.hash = '#/about';
             break;
+          case '5':
+            e.preventDefault();
+            window.location.hash = '#/favorites';
+            break;
         }
       }
     });
